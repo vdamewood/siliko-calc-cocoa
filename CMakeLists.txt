@@ -40,7 +40,7 @@ if (NOT IBTOOL)
 	message(FATAL_ERROR "Command ibtool not found. Can't build GUI. Quitting.")
 endif()
 find_program(ACTOOL actool)
-if (NOT IBTOOL)
+if (NOT ACTOOL)
 	message(FATAL_ERROR "Command actool not found. Can't build icon. Quitting.")
 endif()
 
