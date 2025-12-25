@@ -43,44 +43,47 @@
 
 - (IBAction) Calculate:(id)sender
 {
-	SilikoSyntaxTreeNode *Ast;
-	struct SilikoValue Result;
-
-	Ast = SilikoParseInfix(SilikoStringSourceNew([[self.input stringValue] UTF8String]));
-	Result = SilikoSyntaxTreeEvaluate(Ast, self.caller);
+	SilikoSyntaxTreeNode *Ast = SilikoParseInfix(SilikoStringSourceNew([[self.input stringValue] UTF8String]));
+	SilikoValue *Result = SilikoSyntaxTreeEvaluate(Ast, self.caller);
 	SilikoSyntaxTreeDelete(Ast);
 
-	switch (Result.Status)
+	switch (SilikoValueGetStatus(Result))
 	{
-	case (SILIKO_VAL_INTEGER):
-		[self.output setIntegerValue: Result.Integer];
+	case (SilikoValueInteger):
+		[self.output setIntegerValue: SilikoValueToInteger(Result)];
 		break;
-	case (SILIKO_VAL_FLOAT):
-		[self.output setDoubleValue: Result.Float];
+	case (SilikoValueReal):
+		[self.output setDoubleValue: SilikoValueToReal(Result)];
 		break;
-	case(SILIKO_VAL_MEMORY_ERR):
-		[self.output setStringValue: @"Out of memory"];
-		break;
-	case SILIKO_VAL_SYNTAX_ERR:
-		[self.output setStringValue: @"Syntax error"];
-		break;
-	case SILIKO_VAL_ZERO_DIV_ERR:
-		[self.output setStringValue: @"Division by zero"];
-		break;
-	case SILIKO_VAL_BAD_FUNCTION:
-		[self.output setStringValue: @"Function not found"];
-		break;
-	case SILIKO_VAL_BAD_ARGUMENTS:
-		[self.output setStringValue: @"Bad argument count"];
-		break;
-	case SILIKO_VAL_DOMAIN_ERR:
-		[self.output setStringValue: @"Domain error"];
-		break;
-	case SILIKO_VAL_RANGE_ERR:
-		[self.output setStringValue: @"Range error"];
-		break;
-	default:
-		[self.output setStringValue: @"Unexpected error"];
+	case (SilikoValueError):
+		switch(SilikoValueToError(Result))
+		{
+		case SilikoErrorMemory:
+			[self.output setStringValue: @"Out of memory"];
+			break;
+		case SilikoErrorSyntax:
+			[self.output setStringValue: @"Syntax error"];
+			break;
+		case SilikoErrorZeroDivision:
+			[self.output setStringValue: @"Division by zero"];
+			break;
+		case SilikoErrorFunctionName:
+			[self.output setStringValue: @"Function not found"];
+			break;
+		case SilikoErrorFunctionArguments:
+			[self.output setStringValue: @"Bad argument count"];
+			break;
+		case SilikoErrorDomain:
+			[self.output setStringValue: @"Domain error"];
+			break;
+		case SilikoErrorRange:
+			[self.output setStringValue: @"Range error"];
+			break;
+		default:
+			[self.output setStringValue: @"Unexpected error"];
+		}
 	}
+
+	SilikoValueDelete(Result);
 }
 @end
